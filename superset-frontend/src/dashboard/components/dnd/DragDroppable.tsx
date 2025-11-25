@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -17,14 +18,15 @@
  * under the License.
  */
 import { ReactNode, PureComponent, CSSProperties, RefCallback } from 'react';
+import { useDraggable, useDroppable} from '@dnd-kit/core';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { TAB_TYPE } from 'src/dashboard/util/componentTypes';
-import { DragSource, DropTarget, ConnectDragSource, ConnectDropTarget, ConnectDragPreview, DragSourceMonitor, DropTargetMonitor } from 'react-dnd';
+// import { DragSource, DropTarget, ConnectDragSource, ConnectDropTarget, ConnectDragPreview, DragSourceMonitor, DropTargetMonitor } from 'react-dnd';
 import cx from 'classnames';
 import { css, styled } from '@superset-ui/core';
 
-import { componentShape } from '../../util/propShapes';
-import { dragConfig, dropConfig } from './dragDroppableConfig';
+// import { componentShape } from '../../util/propShapes';
+// import { dragConfig, dropConfig } from './dragDroppableConfig';
 import { DROP_FORBIDDEN } from '../../util/getDropPosition';
 
 type Orientation = 'row' | 'column';
@@ -262,9 +264,36 @@ export class UnwrappedDragDroppable extends PureComponent<DragDroppableProps, Dr
   }
 }
 
-export const Draggable = DragSource(...dragConfig)(UnwrappedDragDroppable);
-export const Droppable = DropTarget(...dropConfig)(UnwrappedDragDroppable);
+// export const Draggable = DragSource(...dragConfig)(UnwrappedDragDroppable);
+// export const Droppable = DropTarget(...dropConfig)(UnwrappedDragDroppable);
 
-export const DragDroppable = DragSource(...dragConfig)(
-  DropTarget(...dropConfig)(UnwrappedDragDroppable),
-);
+function DragDroppableWrapper(props: DragDroppableProps) {
+  const { component, disableDragDrop } = props;
+
+  const draggable = useDraggable({
+    id:  component.id,
+    disabled: disableDragDrop,
+    data: { ...props }
+  });
+
+  const droppable = useDroppable({
+    id: component.id,
+    data: { ...props }
+  });
+
+  return (
+    <div ref={(el) => { draggable.setNodeRef(el); droppable.setNodeRef(el); }}>
+      <UnwrappedDragDroppable
+        {...props}
+        isDragging={draggable.isDragging}
+        isDraggingOver={droppable.isOver}
+      />
+    </div>
+  );
+}
+
+export const DragDroppable = DragDroppableWrapper;
+
+// export const DragDroppable = DragSource(...dragConfig)(
+//   DropTarget(...dropConfig)(UnwrappedDragDroppable),
+// );

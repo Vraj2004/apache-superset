@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -20,8 +21,9 @@ import { Route } from 'react-router-dom';
 import { getExtensionsRegistry } from '@superset-ui/core';
 import { Provider as ReduxProvider } from 'react-redux';
 import { QueryParamProvider } from 'use-query-params';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+// import { DndProvider } from 'react-dnd';
+// import { HTML5Backend } from 'react-dnd-html5-backend';
+import { DndContext } from '@dnd-kit/core';
 import { FlashProvider, DynamicPluginProvider } from 'src/components';
 import { EmbeddedUiConfigProvider } from 'src/components/UiConfigContext';
 import { SupersetThemeProvider } from 'src/theme/ThemeProvider';
@@ -69,7 +71,7 @@ export const EmbeddedContextProviders: React.FC<{
   return (
     <SupersetThemeProvider themeController={themeController}>
       <ReduxProvider store={store}>
-        <DndProvider backend={HTML5Backend}>
+        <DndContext>
           <FlashProvider messages={common.flash_messages}>
             <EmbeddedUiConfigProvider>
               <DynamicPluginProvider>
@@ -88,7 +90,7 @@ export const EmbeddedContextProviders: React.FC<{
               </DynamicPluginProvider>
             </EmbeddedUiConfigProvider>
           </FlashProvider>
-        </DndProvider>
+        </DndContext>
       </ReduxProvider>
     </SupersetThemeProvider>
   );

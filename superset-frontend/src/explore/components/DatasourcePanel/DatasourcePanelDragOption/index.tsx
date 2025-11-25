@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -17,7 +18,8 @@
  * under the License.
  */
 import { RefObject } from 'react';
-import { useDrag } from 'react-dnd';
+// import { useDrag } from 'react-dnd';
+import { useDraggable } from '@dnd-kit/core';
 import { css, Metric, styled, useTheme } from '@superset-ui/core';
 import { ColumnMeta } from '@superset-ui/chart-controls';
 import { DndItemType } from 'src/explore/components/DndItemType';
@@ -26,7 +28,6 @@ import {
   StyledMetricOption,
 } from 'src/explore/components/optionRenderers';
 import { Icons } from '@superset-ui/core/components/Icons';
-
 import { DatasourcePanelDndItem } from '../types';
 
 const DatasourceItemContainer = styled.div`
@@ -69,15 +70,20 @@ export default function DatasourcePanelDragOption(
 ) {
   const { labelRef, showTooltip, type, value } = props;
   const theme = useTheme();
-  const [{ isDragging }, drag] = useDrag({
-    type: props.type,
-    item: {
-      value: props.value,
-      type: props.type,
-    },
-    collect: monitor => ({
-      isDragging: monitor.isDragging(),
-    }),
+  // const [{ isDragging }, drag] = useDrag({
+  //   type: props.type,
+  //   item: {
+  //     value: props.value,
+  //     type: props.type,
+  //   },
+  //   collect: monitor => ({
+  //     isDragging: monitor.isDragging(),
+  //   }),
+  // });
+
+  const {attributes, listeners, setNodeRef,  isDragging} = useDraggable({
+    id: `${type}-${props.value}`,
+    data: {value: props.value, type: props.type},
   });
 
   const optionProps = {
@@ -87,7 +93,7 @@ export default function DatasourcePanelDragOption(
   };
 
   return (
-    <DatasourceItemContainer data-test="DatasourcePanelDragOption" ref={drag}>
+    <DatasourceItemContainer data-test="DatasourcePanelDragOption" ref={setNodeRef} {...listeners} {...attributes}>
       {type === DndItemType.Column ? (
         <StyledColumnOption column={value as ColumnMeta} {...optionProps} />
       ) : (

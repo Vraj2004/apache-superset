@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -18,13 +19,15 @@
  */
 import { styled } from '@superset-ui/core';
 import React, { useRef, FC } from 'react';
-import {
-  DragSourceMonitor,
-  DropTargetMonitor,
-  useDrag,
-  useDrop,
-  XYCoord,
-} from 'react-dnd';
+// import {
+//   DragSourceMonitor,
+//   DropTargetMonitor,
+//   useDrag,
+//   useDrop,
+//   XYCoord,
+// } from 'react-dnd';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Icons } from '@superset-ui/core/components/Icons';
 import type { IconType } from '@superset-ui/core/components/Icons/types';
 
@@ -54,6 +57,7 @@ const DragIcon = styled(Icons.Drag, {
 `;
 
 interface FilterTabTitleProps {
+  id: string;
   index: number;
   filterIds: string[];
   onRearrange: (dragItemIndex: number, targetIndex: number) => void;

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,7 +17,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { useDragLayer } from 'react-dnd';
+// import { useDragLayer } from 'react-dnd';
+import { DragOverlay } from '@dnd-kit/core';
 import { Slice } from 'src/dashboard/types';
 import AddSliceCard from '../AddSliceCard';
 import {
@@ -24,15 +26,19 @@ import {
   CHART_TYPE,
 } from '../../util/componentTypes';
 
-interface DragItem {
-  index: number;
-  parentType: string;
-  type: string;
-}
+// interface DragItem {
+//   index: number;
+//   parentType: string;
+//   type: string;
+// }
 
 interface AddSliceDragPreviewProps {
   slices: Slice[] | null;
-}
+
+  activeDragItem?: {
+    index:number, parentType: string, type: string} | null;
+  }
+
 
 const staticCardStyles: React.CSSProperties = {
   position: 'fixed',
@@ -44,30 +50,36 @@ const staticCardStyles: React.CSSProperties = {
 };
 
 const AddSliceDragPreview: React.FC<AddSliceDragPreviewProps> = ({
-  slices,
+  slices, activeDragItem
 }) => {
-  const { dragItem, isDragging, currentOffset } = useDragLayer(
-    (monitor: any) => ({
-      dragItem: monitor.getItem() as DragItem | null,
-      currentOffset: monitor.getSourceClientOffset(),
-      isDragging: monitor.isDragging(),
-    }),
-  );
-  if (!isDragging || !currentOffset || !dragItem || !slices) return null;
+  // const { dragItem, isDragging, currentOffset } = useDragLayer(
+  //   (monitor: any) => ({
+  //     dragItem: monitor.getItem() as DragItem | null,
+  //     currentOffset: monitor.getSourceClientOffset(),
+  //     isDragging: monitor.isDragging(),
+  //   }),
+  // );
+  
+  // if (!isDragging || !currentOffset || !dragItem || !slices) return null;
 
-  const slice = slices[dragItem.index];
+  if (!activeDragItem || !slices) return null;
+  
+  
+  const slice = slices[activeDragItem.index];
 
-  // make sure it's a new component and a chart
   const shouldRender =
     slice &&
-    dragItem.parentType === NEW_COMPONENT_SOURCE_TYPE &&
-    dragItem.type === CHART_TYPE;
+    activeDragItem.parentType === NEW_COMPONENT_SOURCE_TYPE &&
+    activeDragItem.type === CHART_TYPE;
+  
+  if (!shouldRender) {
+    return null;
+  }
 
   return !shouldRender ? null : (
     <AddSliceCard
       style={{
         ...staticCardStyles,
-        transform: `translate(${currentOffset.x}px, ${currentOffset.y}px)`,
       }}
       sliceName={slice.slice_name}
       lastModified={slice.changed_on_humanized}

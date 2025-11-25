@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -17,7 +18,8 @@
  * under the License.
  */
 import { ReactNode, useCallback, useContext, useEffect, useMemo } from 'react';
-import { useDrop } from 'react-dnd';
+// import { useDrop } from 'react-dnd';
+import { useDroppable } from '@dnd-kit/core';
 import { t } from '@superset-ui/core';
 import ControlHeader from 'src/explore/components/ControlHeader';
 import {
@@ -54,6 +56,10 @@ export default function DndSelectLabel({
   isLoading,
   ...props
 }: DndSelectLabelProps) {
+
+  const dragState = useContext(DraggingContext);
+  const draggedItem = dragState?.item;
+  const isDraggingItem = !!draggedItem;
   const canDropProp = props.canDrop;
   const canDropValueProp = props.canDropValue;
 
@@ -63,23 +69,39 @@ export default function DndSelectLabel({
     [canDropProp, canDropValueProp],
   );
 
-  const [{ isOver, canDrop }, datasourcePanelDrop] = useDrop({
-    accept: isLoading ? [] : accept,
+  // const [{ isOver, canDrop }, datasourcePanelDrop] = useDrop({
+  //   accept: isLoading ? [] : accept,
 
-    drop: (item: DatasourcePanelDndItem) => {
-      props.onDrop(item);
-      props.onDropValue?.(item.value);
-    },
+  //   drop: (item: DatasourcePanelDndItem) => {
+  //     props.onDrop(item);
+  //     props.onDropValue?.(item.value);
+  //   },
 
-    canDrop: dropValidator,
+  //   canDrop: dropValidator,
 
-    collect: monitor => ({
-      isOver: monitor.isOver(),
-      canDrop: monitor.canDrop(),
-      type: monitor.getItemType(),
-    }),
+  //   collect: monitor => ({
+  //     isOver: monitor.isOver(),
+  //     canDrop: monitor.canDrop(),
+  //     type: monitor.getItemType(),
+  //   }),
+  // });
+  const {setNodeRef, isOver } = useDroppable({
+    id: props.name,
   });
+  
+   const canDrop = useMemo(() => {
+    if (!isDraggingItem || isLoading) return false;
+    if (!draggedItem) return false;
 
+    const typeOk = Array.isArray(accept)
+      ? accept.includes(draggedItem.type)
+      : draggedItem.type === accept;
+
+    if (!typeOk) return false;
+
+    return dropValidator(draggedItem);
+  }, [draggedItem, isDraggingItem, accept, dropValidator, isLoading]);
+  
   const dispatch = useContext(DropzoneContext)[1];
 
   useEffect(() => {
@@ -106,7 +128,7 @@ export default function DndSelectLabel({
   }
 
   return (
-    <div ref={datasourcePanelDrop}>
+    <div ref={setNodeRef}>
       <HeaderContainer>
         <ControlHeader {...props} />
       </HeaderContainer>
